@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>MyTube — Главная</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --blue: #2196f3;
+      --card: #1c1c1c;
+      --text: #f1f1f1;
+      --radius: 12px;
+      --tr: 0.25s ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: grid;
+      grid-template-areas:
+        "topbar topbar"
+        "sidebar content";
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 56px 1fr;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    .topbar {
+      grid-area: topbar;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      background: #161616;
+      border-bottom: 1px solid #222;
+      gap: 12px;
+    }
+    .logo {
+      width: 34px; height: 24px; fill: var(--blue); flex-shrink: 0;
+    }
+    .brand {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      background: #141414;
+      border-right: 1px solid #222;
+      padding: 16px 0;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 24px;
+      font-size: .95rem;
+      border-left: 4px solid transparent;
+      transition: background var(--tr), border-color var(--tr);
+    }
+    .sidebar a.active {
+      background: #222;
+      border-color: var(--blue);
+    }
+    .sidebar a:hover {
+      background: #222;
+      border-color: var(--blue);
+    }
+
+    .content {
+      grid-area: content;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform var(--tr), box-shadow var(--tr);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.35);
+    }
+    .card img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+    }
+    .card-info {
+      padding: 10px;
+    }
+    .card-title {
+      font-size: .9rem;
+      font-weight: 600;
+      line-height: 1.3;
+      max-height: 2.6em;
+      overflow: hidden;
+    }
+    .card-channel {
+      font-size: .8rem;
+      opacity: .7;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 64px 1fr; }
+      .sidebar { width: 64px; }
+      .sidebar a { padding: 10px 12px; font-size: 0; }
+      .sidebar a::before { content: "•"; font-size: 20px; }
+      .brand { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="index.html">
+      <svg class="logo" viewBox="0 0 24 24">
+        <rect x="1" y="4" width="22" height="16" rx="4"/>
+        <polygon points="10,8 16,12 10,16" fill="#fff"/>
+      </svg>
+    </a>
+    <a href="index.html" class="brand">MyTube</a>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <nav>
+      <ul>
+        <li><a href="#">Главная</a></li>
+        <li><a href="#">Подписки</a></li>
+        <li><a href="#">Библиотека</a></li>
+        <li><a href="#">Плейлисты</a></li>
+        <li><a href="#">Ваши видео</a></li>
+        <li><a href="#">Смотреть позже</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+    <section class="gallery" id="gallery"></section>
+  </main>
+
+  <script>
+    const API_KEY     = 'AIzaSyDWdKZTknp3yeGBbMw9d1R-AHQj1aBBUNk';
+    const PLAYLIST_ID = 'PLoSWVnSA9vG9hJNdgr-81MG59EYT9eEYn';
+    const MAX_VIDEOS  = 100;
+    const gallery     = document.getElementById('gallery');
+
+    async function getPlaylistItems(id, max) {
+      let items = [], token = '';
+      while (items.length < max) {
+        const params = new URLSearchParams({
+          key: API_KEY,
+          part: 'snippet',
+          playlistId: id,
+          maxResults: 50,
+          pageToken: token
+        });
+        const res = await fetch('https://www.googleapis.com/youtube/v3/playlistItems?' + params);
+        if (!res.ok) throw new Error('Ошибка API');
+        const data = await res.json();
+        items.push(...data.items);
+        token = data.nextPageToken || '';
+        if (!token) break;
+      }
+      return items.slice(0, max);
+    }
+
+    function makeCard(item) {
+      const { title, thumbnails, channelTitle, resourceId } = item.snippet;
+      const vid = resourceId.videoId;
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.onclick = () => location.href = `watch.html?v=${vid}`;
+      card.innerHTML = `
+        <img src="${thumbnails.medium.url}" alt="${title}">
+        <div class="card-info">
+          <div class="card-title">${title}</div>
+          <div class="card-channel">${channelTitle}</div>
+        </div>`;
+      return card;
+    }
+
+    (async function init() {
+      try {
+        const items = await getPlaylistItems(PLAYLIST_ID, MAX_VIDEOS);
+        if (!items.length) throw new Error('Плейлист пуст или неверный ID');
+        items.forEach(it => gallery.appendChild(makeCard(it)));
+      } catch (err) {
+        gallery.innerHTML = `<p style="opacity:.7">${err.message}</p>`;
+        console.error(err);
+      }
+    })();
+  </script>
+
+</body>
+</html>
