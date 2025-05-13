@@ -116,11 +116,30 @@
       .sidebar a::before { content: "•"; font-size: 20px; }
       .brand { font-size: 1rem; }
     }
+@media (max-width: 480px) {
+
+  .gallery {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .card-info {
+    padding: 8px;
+  }
+
+  .card-title {
+    font-size: .85rem;
+  }
+}
+
   </style>
 </head>
 <body>
 
-  <!-- TOP BAR -->
   <header class="topbar">
     <a href="index.html">
       <svg class="logo" viewBox="0 0 24 24">
@@ -131,7 +150,7 @@
     <a href="index.html" class="brand">MyTube</a>
   </header>
 
-  <!-- SIDEBAR -->
+
   <aside class="sidebar">
     <nav>
       <ul>
@@ -145,7 +164,6 @@
     </nav>
   </aside>
 
-  <!-- CONTENT -->
   <main class="content">
     <section class="gallery" id="gallery"></section>
   </main>
