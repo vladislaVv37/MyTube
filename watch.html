@@ -4,22 +4,18 @@
   <meta charset="UTF-8">
   <title>MyTube — Смотреть видео</title>
   <style>
-    /* Сбрасываем отступы и бордеры */
     * { margin: 0; padding: 0; box-sizing: border; }
-
-    /* Шапка */
     header {
       display: flex;
       align-items: center;
       height: 56px;
       padding: 0 15px;
-      background: #171616;       /* можно сменить на любой цвет */
+      background: #171616;
       color: #ffffff;
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 10;
     }
-    /* Синяя иконка-логотип */
     .logo {
       width: 34px;
       height: 24px;
@@ -27,7 +23,6 @@
       flex-shrink: 0;
       cursor: pointer;
     }
-    /* Ссылка с названием */
     .brand {
       margin-left: 12px;
       font-size: 1.25rem;
@@ -37,41 +32,59 @@
       cursor: pointer;
     }
 
-    /* Контейнер для видео */
     .video-wrapper {
-      /* отступ сверху = высоте шапки, чтобы видео не «уезжало» под неё */
       padding-top: 56px;
-      background: #000;        /* Чёрный фон под видео */
+      background: #000;        
       width: 100vw;
       height: calc(100vh - 56px);
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 8px 0 0;
     }
-    /* Сам iframe */
+    
     iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
+@media (max-width: 480px) {
+  header {
+    padding: 0 8px;
+  }
+  .logo {
+    width: 28px;
+    height: 20px;
+  }
+  .brand {
+    font-size: 1rem;
+    margin-left: 8px;
+  }
+  .video-wrapper {
+    padding-top: 56px;
+  }
+  iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+  }
+}
+
   </style>
 </head>
 <body>
 
-  <!-- Шапка с логотипом и ссылкой на главную -->
   <header>
-    <!-- логотип кликабелен и ведёт на index.html -->
     <a href="index.html">
       <svg class="logo" viewBox="0 0 24 24">
         <rect x="1" y="4" width="22" height="16" rx="4"/>
         <polygon points="10,8 16,12 10,16" fill="#fff"/>
       </svg>
     </a>
-    <!-- название кликабельно -->
     <a href="index.html" class="brand">MyTube</a>
   </header>
 
-  <!-- Видео на весь экран под шапкой -->
+
   <div class="video-wrapper">
     <iframe id="player" allowfullscreen allow="autoplay"></iframe>
   </div>
